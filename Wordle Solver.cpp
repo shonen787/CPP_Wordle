@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "json.hpp"
+#include <algorithm>
 
 using namespace std;
 
@@ -29,7 +30,8 @@ int CheckArguments(int argc,char *argv[], string &badLetters, string &PossibleLe
             int j = 0;
             for (j; j < strlen(argv[i + 1]); j++) {
                 char* a = argv[i + 1];
-                KnownLetters[j] = a[j];
+                string s(1, a[j]);
+                KnownLetters[j] = s;
             }
         }
         if (strcmp(argv[i], "-p") == 0) {
@@ -58,17 +60,32 @@ void PopulateVector(vector<string>& Wordbase) {
 
 void CleanVector(vector<string>& Wordbase, string& badLetters, string& PossibleLetters, nlohmann::json& Known_Positions) {
     string temp;
-
     //Remove words with "Bad" Letters from the wordlist
-     for (char i : badLetters) {
-         for (auto it = Wordbase.begin(); it != Wordbase.end(); it++) {
-             temp = *it;
-             if (temp.find((char)toupper(i)) != std::string::npos) {
-                 Wordbase.erase(it--);
-             }
-         }
-     }
-    
+    for (char i : badLetters) {
+        for (auto it = Wordbase.begin(); it != Wordbase.end(); it++) {
+            temp = *it;
+            if (temp.find((char)toupper(i)) != std::string::npos) {
+                Wordbase.erase(it--);
+            }
+        }
+    }
+
+
+    //Remove Words that don't have the right letters in the right positions
+    for (auto it = Wordbase.begin(); it != Wordbase.end(); it++) {
+        string fuck = *it;
+        for (int i = 0; i < Known_Positions.size(); i++) {
+            string str = Known_Positions[i];
+            str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
+            if (str[0] != '_') {
+                if (fuck.at(i) != str[0]) {
+                    Wordbase.erase(it--);
+                }
+            }
+
+        }
+    }
+
      //Remove Words that don't have the possible letters from wordlist
      for (char i : PossibleLetters) {
          for (auto it = Wordbase.begin(); it != Wordbase.end(); it++) {
@@ -78,11 +95,7 @@ void CleanVector(vector<string>& Wordbase, string& badLetters, string& PossibleL
              }
          }
      }
-
-     //Remove Words that don't have the right letters in the right positions
-     for (int i = 0; i < Known_Positions.size(); i++) {
-         cout << Known_Positions.at(i) << '\n';
-     }
+     
 }
 
 
@@ -95,9 +108,9 @@ int main(int argc, char* argv[]) {
     CheckArguments(argc, argv, badLetters, PossibleLetters, Known_Positions);
     PopulateVector(Wordbase);
     CleanVector(Wordbase, badLetters, PossibleLetters, Known_Positions);
-  /*  for (string i : Wordbase) {
+    for (string i : Wordbase) {
         cout << i << '\n';
-    }*/
+    }
 
     return 0;
 }
