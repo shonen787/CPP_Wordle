@@ -81,7 +81,7 @@ void CleanVector(vector<string>& Wordbase, string& badLetters, string& PossibleL
 
      //Remove Words that don't have the right letters in the right positions
      for (int i = 0; i < Known_Positions.size(); i++) {
-         cout << PossibleLetters[i] << '\n';
+         cout << Known_Positions.at(i) << '\n';
      }
 }
 
@@ -93,7 +93,6 @@ int main(int argc, char* argv[]) {
     nlohmann::json Known_Positions;
 
     CheckArguments(argc, argv, badLetters, PossibleLetters, Known_Positions);
-    cout << Known_Positions << '\n';
     PopulateVector(Wordbase);
     CleanVector(Wordbase, badLetters, PossibleLetters, Known_Positions);
   /*  for (string i : Wordbase) {
